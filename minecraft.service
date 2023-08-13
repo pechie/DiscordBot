@@ -1,0 +1,23 @@
+[Unit]
+Description=Minecraft server
+After=local-fs.target network.target
+
+[Service]
+WorkingDirectory=/opt/minecraft/server
+User=minecraft
+Group=root
+Type=simple
+
+# Start the server on instance startup
+ExecStart=/usr/bin/java -Xmx4096M -Xms1024M -jar server.jar nogui
+# -Xmx specifies the max memory the server is allowed to use, while -Xmx is the minimum
+
+# Send "stop" to the Minecraft server console
+ExecStop=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff \"stop\"\015'
+# Wait for the PID to die - otherwise it's killed after this command finishes!
+ExecStop=/bin/bash -c "while ps -p $MAINPID > /dev/null; do /bin/sleep 1; done"
+# If the server fails for whatever reason, it will restart automatically
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
